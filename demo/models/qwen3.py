@@ -141,7 +141,7 @@ class Qwen3Model(nn.Module):
 
     def forward(
         self,
-        config,
+        input_ids,
     ):
         hidden_states = self.embed_tokens(input_ids)
         residual = None
@@ -166,7 +166,7 @@ class Qwen3ForCausalLM(nn.Module):
     ):
         super().__init__()
         self.model = Qwen3Model(config)
-        self.lm_head = ParallelLMHead(config.vocab_size, config.hidden_size)
+        # self.lm_head = ParallelLMHead(config.vocab_size, config.hidden_size)
         if config.tie_word_embeddings:
             self.lm_head.weight.data = self.model.embed_tokens.weight.data
 
@@ -197,9 +197,9 @@ if __name__ == "__main__":
 
         # 3. 验证输出形状
         expected_shape = (batch_size, seq_len, config.hidden_size)
-        assert (
-            output.shape == expected_shape
-        ), f"形状错误: 期望 {expected_shape}, 得到 {output.shape}"
+        assert output.shape == expected_shape, (
+            f"形状错误: 期望 {expected_shape}, 得到 {output.shape}"
+        )
         print("✅ 形状验证通过!")
 
         # 4. 验证因果性 (简易测试)

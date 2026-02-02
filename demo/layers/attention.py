@@ -21,9 +21,9 @@ class Attention(nn.Module):
         k: torch.Tensor,  # [B,Tk,Hkv,D]
         v: torch.Tensor,  # [B,Tk,Hkv,D]
     ) -> torch.Tensor:
-        assert (
-            q.dim() == 4 and k.dim() == 4 and v.dim() == 4
-        ), f"expected q/k/v 4D, got {q.shape}, {k.shape}, {v.shape}"
+        assert q.dim() == 4 and k.dim() == 4 and v.dim() == 4, (
+            f"expected q/k/v 4D, got {q.shape}, {k.shape}, {v.shape}"
+        )
         B, Tq, Hq, D = q.shape
         Bk, Tk, Hkv, Dk = k.shape
         Bv, Tv, Hvv, Dv = v.shape
