@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from demo.layers.attention import Attention
 from demo.layers.layernorm import RMSNorm
-from demo.layers.rotary_embedding import RotaryEmbedding
+from demo.layers.rotary_embedding import get_rope
 from dataclasses import dataclass
 
 
@@ -20,7 +20,7 @@ class ModelConfig:
     vocab_size: int = 16384
     rope_theta: float = 1e6
     max_position_embeddings: int = 32768
-    scale: float
+    scale: float = 1.0
 
 
 class Qwen3Attention(nn.Module):
@@ -41,10 +41,10 @@ class Qwen3Attention(nn.Module):
         self.o_proj = nn.Linear(self.num_head * self.head_dim, self.hidden_size)
 
         self.attn = Attention(config)
-        self.rotary_emb = RotaryEmbedding(
+        self.rotary_emb = get_rope(
             self.head_dim,
             rotary_dim=self.head_dim,
-            max_position_embeddings=config.max_position_embeddings,
+            max_position=config.max_position_embeddings,
             base=config.rope_theta,
         )
 
@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
         # 比较前 seq_len-1 个位置是否一致
         diff = torch.abs(out1[:, :-1, :] - out2[:, :-1, :]).max()
-        assert diff < 1e-5, f"因果性验证失败! 差异: {diff}"
+        assert diff < 1e-6, f"因果性验证失败! 差异: {diff}"
         print("✅ 因果掩码验证通过!")
 
     except Exception as e:
